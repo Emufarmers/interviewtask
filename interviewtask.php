@@ -4,7 +4,7 @@ class CurrencyConversion {
 	private $dbuser = "interviewtest";
 	private $dbpass = "";
 	private $dbname = "interviewtest";
-	private $datalocation = "https://toolserver.org/~kaldari/rates.xml"; //error checking
+	private $datalocation = "https://toolserver.org/~kaldari/rates.xml";
 	private $mysqli = null;
 	
 	function connect() {
@@ -17,7 +17,12 @@ class CurrencyConversion {
 	
 	function updateData( ) {
 		$data = $this->retrieveData();
+		libxml_use_internal_errors(true);
 		$xml = simplexml_load_string($data);
+		if( $xml === false ) {
+			echo "The XML data file was missing or corrupt; the database has been left unchanged.";
+			return;
+		}
 		$mysqli = $this->connect();
 		foreach ($xml as $item) {
 			$this->insertItem($mysqli, $item);
@@ -47,6 +52,11 @@ class CurrencyConversion {
 		$mysqli->real_query( "SELECT exchange_rate FROM currency_conversions " .
 			"WHERE currency_code='$currency'" );
 		$result = $mysqli->use_result()->fetch_row();
+		if( !$result ) {
+			/* not a proper solution, but better than finding
+			out someone's money was getting multiplied by 0 */
+			return $currency . ' ' . "INVALID";  
+		}
 		return $currency . ' ' . $result[0] * $amount;
 	}
 
