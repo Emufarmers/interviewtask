@@ -20,7 +20,7 @@ class CurrencyConversion {
 		libxml_use_internal_errors(true);
 		$xml = simplexml_load_string($data);
 		if( $xml === false ) {
-			echo "The XML data file was missing or corrupt; the database has been left unchanged.";
+			echo "The XML data file was missing or corrupt; the database has been left unchanged.\n";
 			return;
 		}
 		$mysqli = $this->connect();
@@ -52,10 +52,10 @@ class CurrencyConversion {
 		$mysqli->real_query( "SELECT exchange_rate FROM currency_conversions " .
 			"WHERE currency_code='$currency'" );
 		$result = $mysqli->use_result()->fetch_row();
-		if( !$result ) {
+		if( !$result | !is_numeric($amount) ) {
 			/* not a proper solution, but better than finding
 			out someone's money was getting multiplied by 0 */
-			return $currency . ' ' . "INVALID";  
+			return "$currency INVALID";  
 		}
 		return $currency . ' ' . $result[0] * $amount;
 	}
@@ -71,5 +71,5 @@ class CurrencyConversion {
 
 $conv = new CurrencyConversion();
 $conv->updateData();
-echo $conv->convert('JPY 500') . "\n";
-echo var_dump($conv->convertArray(array('JPY 5000', 'CZK 62.5')));
+echo $conv->convert( 'JPY 500' ) . "\n";
+var_dump( $conv->convertArray( array( 'JPY 5000', 'CZK 62.5' ) ) );
