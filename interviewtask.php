@@ -52,7 +52,7 @@ class CurrencyConversion {
 		$mysqli->real_query( "SELECT exchange_rate FROM currency_conversions " .
 			"WHERE currency_code='$currency'" );
 		$result = $mysqli->use_result()->fetch_row();
-		if( !$result | !is_numeric($amount) ) {
+		if( !$result | !is_numeric( $amount ) ) {
 			/* not a proper solution, but better than finding
 			out someone's money was getting multiplied by 0 */
 			return "$currency INVALID";  
